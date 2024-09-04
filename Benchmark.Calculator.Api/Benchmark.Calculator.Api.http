@@ -1,0 +1,6 @@
+@Benchmark.Calculator.Api_HostAddress = http://localhost:5127
+
+GET {{Benchmark.Calculator.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
