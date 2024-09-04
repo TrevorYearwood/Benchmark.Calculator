@@ -1,6 +1,7 @@
 @Benchmark.Calculator.Api_HostAddress = http://localhost:5127
+@numbers = 34,332
 
-GET {{Benchmark.Calculator.Api_HostAddress}}/weatherforecast/
+GET {{Benchmark.Calculator.Api_HostAddress}}/calculator/{{numbers}}/add
 Accept: application/json
 
 ###

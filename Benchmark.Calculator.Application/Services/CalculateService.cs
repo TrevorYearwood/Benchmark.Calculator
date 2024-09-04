@@ -7,35 +7,24 @@ namespace Benchmark.Calculator.Application.Services
     {
         private List<IValidationStrategy> _validationStrategies = [];
 
-        private const string CustomDelimiter = "//";
-        private const int MaxNumber = 1000;
+        private const string _customDelimiter = "//";
+        private const int _maxNumber = 1000;
 
         public (long, string) Add(string? numbers)
         {
             if (string.IsNullOrEmpty(numbers))
                 return (0, "Empty String");
 
+            var numbersSpan = numbers.AsSpan();
+
+            List<string> delimiters = CreateDelimiters(numbers, numbersSpan);
+
             if (numbers.Contains(",\n", StringComparison.InvariantCultureIgnoreCase)
                 || numbers.Contains("\n,", StringComparison.InvariantCultureIgnoreCase))
                 return (0, "Invalid Input");
 
-            var numbersSpan = numbers.AsSpan();
-
-            var delimiters = new List<string> { "\n" };
-
-            if (numbers.StartsWith(CustomDelimiter))
-            {
-                var customDelimiter = numbersSpan.Slice(2, numbersSpan.IndexOf('\n') - 2);
-
-                delimiters.Add(customDelimiter.ToString());
-            }
-            else
-            {
-                delimiters.Add(",");
-            }
-
-            var numbersArray = numbers.StartsWith(CustomDelimiter)
-                                    ? numbersSpan.Slice(2).ToString()
+            var numbersArray = numbers.StartsWith(_customDelimiter)
+                                    ? numbersSpan[2..].ToString()
                                     : numbers.ToString();
 
             var splitInput = numbersArray
@@ -44,10 +33,27 @@ namespace Benchmark.Calculator.Application.Services
             return AddNumbers(splitInput);
         }
 
+        private static List<string> CreateDelimiters(string numbers, ReadOnlySpan<char> numbersSpan)
+        {
+            var delimiters = new List<string> { "\n" };
+
+            if (numbers.StartsWith(_customDelimiter))
+            {
+                var customDelimiter = numbersSpan[_customDelimiter.Length..numbersSpan.IndexOf('\n')];
+
+                delimiters.Add(customDelimiter.ToString());
+            }
+            else
+            {
+                delimiters.Add(",");
+            }
+
+            return delimiters;
+        }
+
         private (long, string) AddNumbers(string[] splitInput)
         {
-            _validationStrategies.Add(new NegativeNumberValidation());
-            _validationStrategies.Add(new MaxNumberValidationStrategy(MaxNumber));
+            AddValidationStrategies();
 
             long sum = 0;
             int result = 0;
@@ -76,6 +82,11 @@ namespace Benchmark.Calculator.Application.Services
                     sum += result;
             }
 
+            return CheckNegativeNumbers(negativeNumbers, sum);
+        }
+
+        private static (long, string) CheckNegativeNumbers(List<int> negativeNumbers, long sum)
+        {
             if (negativeNumbers.Count > 0)
             {
                 var negativeNumbersToString = negativeNumbers.Count > 0
@@ -86,6 +97,15 @@ namespace Benchmark.Calculator.Application.Services
             }
 
             return (sum, string.Empty);
+        }
+
+        private void AddValidationStrategies()
+        {
+            _validationStrategies =
+            [
+                new NegativeNumberValidation(),
+                new MaxNumberValidationStrategy(_maxNumber),
+            ];
         }
     }
 }

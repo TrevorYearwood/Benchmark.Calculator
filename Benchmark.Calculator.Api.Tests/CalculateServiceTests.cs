@@ -62,6 +62,7 @@ namespace Benchmark.Calculator.Api.Tests
         [InlineData("//;\n1;2", 3, "")]
         [InlineData("//*\n14*22*200", 236, "")]
         [InlineData("//'\n1'78\n90'3", 172, "")]
+        [InlineData("//:\n1:\n", 0, "Invalid Input")]
         public void ShouldShowCorrectResultIfInputIsValidUsingCustomDelimiter(string? input, long expectedResult, string expectedErrors)
         {
             //Arrange

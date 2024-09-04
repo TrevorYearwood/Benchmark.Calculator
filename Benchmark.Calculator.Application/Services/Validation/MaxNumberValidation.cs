@@ -1,19 +1,17 @@
 ﻿using Benchmark.Calculator.Application.Contracts;
 
-public class MaxNumberValidationStrategy : IValidationStrategy
+namespace Benchmark.Calculator.Application.Services.Validation
 {
-    private readonly int _maxValue;
-
-    public MaxNumberValidationStrategy(int maxValue)
+    public class MaxNumberValidationStrategy(int maxValue) : IValidationStrategy
     {
-        _maxValue = maxValue;
-    }
+        private readonly int _maxValue = maxValue;
 
-    public bool Validate(int input)
-    {
-        if (input > _maxValue)
-            return false;
+        public bool Validate(int input)
+        {
+            if (input > _maxValue)
+                return false;
 
-        return true;
+            return true;
+        }
     }
 }
