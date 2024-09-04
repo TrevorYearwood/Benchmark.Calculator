@@ -57,5 +57,22 @@ namespace Benchmark.Calculator.Api.Tests
             result.ShouldBe(expectedResult);
             errors.ShouldBe(expectedErrors);
         }
+
+        [Theory]
+        [InlineData("//;\n1;2", 3, "")]
+        [InlineData("//*\n14*22*200", 236, "")]
+        [InlineData("//'\n1'78\n90'3", 172, "")]
+        public void ShouldCorrectResultIfInputIsValidUsingCustomDelimiter(string? input, long expectedResult, string expectedErrors)
+        {
+            //Arrange
+            _calculateService = new CalculateService();
+
+            //Act
+            var (result, errors) = _calculateService.Add(input);
+
+            //Assert 
+            result.ShouldBe(expectedResult);
+            errors.ShouldBe(expectedErrors);
+        }
     }
 }
