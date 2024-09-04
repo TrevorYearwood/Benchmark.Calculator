@@ -1,10 +1,14 @@
 ﻿using Benchmark.Calculator.Application.Contracts;
+using Benchmark.Calculator.Application.Services.Validation;
 
 namespace Benchmark.Calculator.Application.Services
 {
     public class CalculateService : ICalculateService
     {
+        private List<IValidationStrategy> _validationStrategies = [];
+
         private const string CustomDelimiter = "//";
+        private const int MaxNumber = 1000;
 
         public (long, string) Add(string? numbers)
         {
@@ -40,21 +44,45 @@ namespace Benchmark.Calculator.Application.Services
             return AddNumbers(splitInput);
         }
 
-        private static (long, string) AddNumbers(string[] splitInput)
+        private (long, string) AddNumbers(string[] splitInput)
         {
+            _validationStrategies.Add(new NegativeNumberValidation());
+            _validationStrategies.Add(new MaxNumberValidationStrategy(MaxNumber));
+
             long sum = 0;
+            int result = 0;
+            var isValid = false;
+            var negativeNumbers = new List<int>();
 
             foreach (var number in splitInput)
             {
-                try
+                foreach (var strategy in _validationStrategies)
                 {
-                    int result = int.Parse(number);
+                    try
+                    {
+                        result = int.Parse(number);
+                        isValid = strategy.Validate(result);
+                    }
+                    catch
+                    {
+                        return (0, string.Empty);
+                    }
+                }
+
+                if (result < 0)
+                    negativeNumbers.Add(result);
+
+                if (isValid)
                     sum += result;
-                }
-                catch
-                {
-                    return (0, string.Empty);
-                }
+            }
+
+            if (negativeNumbers.Count > 0)
+            {
+                var negativeNumbersToString = negativeNumbers.Count > 0
+                    ? string.Join(", ", negativeNumbers)
+                    : negativeNumbers.ToString();
+
+                return (0, $"Negatives not allowed : {negativeNumbersToString}");
             }
 
             return (sum, string.Empty);
