@@ -18,7 +18,7 @@ namespace Benchmark.Calculator.Api.Tests
             _calculateService = new CalculateService();
 
             //Act
-            var result = _calculateService.Add(input);
+            var (result, errors) = _calculateService.Add(input);
 
             //Assert 
             result.ShouldBe(0);
@@ -35,10 +35,27 @@ namespace Benchmark.Calculator.Api.Tests
             _calculateService = new CalculateService();
 
             //Act
-            var result = _calculateService.Add(input);
+            var (result, errors) = _calculateService.Add(input);
 
             //Assert 
             result.ShouldBe(correctResult);
+        }
+
+        [Theory]
+        [InlineData("10\n", 10, "")]
+        [InlineData("1,\n", 0, "Invalid Input")]
+        [InlineData("1\n2, 3", 6, "")]
+        public void ShouldCorrectResultIfInputIsValidUsingCommaSeparatedValuesAndNewLines(string? input, long expectedResult, string expectedErrors)
+        {
+            //Arrange
+            _calculateService = new CalculateService();
+
+            //Act
+            var (result, errors) = _calculateService.Add(input);
+
+            //Assert 
+            result.ShouldBe(expectedResult);
+            errors.ShouldBe(expectedErrors);
         }
     }
 }

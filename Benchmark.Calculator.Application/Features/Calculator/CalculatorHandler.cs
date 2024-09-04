@@ -16,7 +16,7 @@ namespace Benchmark.Calculator.Application.Features.Calculator
 
         public async Task<CalculatorResponse> Handle(CalculatorCommand command, CancellationToken cancellationToken)
         {
-            var result = _calculateService.Add(command.Numbers);
+            var (result, errors) = _calculateService.Add(command.Numbers);
 
             var response = new CalculatorResponse
             {

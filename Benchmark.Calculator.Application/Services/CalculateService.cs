@@ -4,23 +4,34 @@ namespace Benchmark.Calculator.Application.Services
 {
     public class CalculateService : ICalculateService
     {
-        public long Add(string? input)
+        public (long, string) Add(string? numbers)
         {
-            if (string.IsNullOrEmpty(input))
-                return 0;
+            if (string.IsNullOrEmpty(numbers))
+                return (0, "Empty String");
 
-            var splitInput = input.Split(',');
+            if (numbers.Contains(",\n", StringComparison.InvariantCultureIgnoreCase)
+                || numbers.Contains("\n,", StringComparison.InvariantCultureIgnoreCase))
+                return (0, "Invalid Input");
+
+            var delimiters = new string[] { ",", "\n" };
+
+            var splitInput = numbers.Split(delimiters, StringSplitOptions.None);
             long sum = 0;
 
             foreach (var number in splitInput)
             {
-                if (int.TryParse(number, out int result))
+                try
                 {
+                    int result = int.Parse(number);
                     sum += result;
+                }
+                catch
+                {
+                    return (0, string.Empty);
                 }
             }
 
-            return sum;
+            return (sum, string.Empty);
         }
     }
 }
