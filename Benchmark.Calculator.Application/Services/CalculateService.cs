@@ -5,10 +5,19 @@ namespace Benchmark.Calculator.Application.Services
 {
     public class CalculateService : ICalculateService
     {
-        private List<IValidationStrategy> _validationStrategies = [];
+        private readonly List<IValidationStrategy> _validationStrategies = [];
 
         private const string _customDelimiter = "//";
         private const int _maxNumber = 1000;
+
+        public CalculateService()
+        {
+            _validationStrategies =
+            [
+                new NegativeNumberValidation(),
+                new MaxNumberValidationStrategy(_maxNumber),
+            ];
+        }
 
         public (long, string) Add(string? numbers)
         {
@@ -19,13 +28,16 @@ namespace Benchmark.Calculator.Application.Services
 
             List<string> delimiters = CreateDelimiters(numbers, numbersSpan);
 
-            if (numbers.Contains(",\n", StringComparison.InvariantCultureIgnoreCase)
-                || numbers.Contains("\n,", StringComparison.InvariantCultureIgnoreCase))
-                return (0, "Invalid Input");
-
             var numbersArray = numbers.StartsWith(_customDelimiter)
-                                    ? numbersSpan[2..].ToString()
-                                    : numbers.ToString();
+                        ? numbersSpan[numbersSpan.IndexOf('\n')..].ToString()
+                        : numbers.ToString();
+
+            foreach (var delimiter in delimiters)
+            {
+                if (numbersArray.Contains($"{delimiter}\n", StringComparison.InvariantCultureIgnoreCase)
+                    || numbersArray.Contains($"\n{delimiter}", StringComparison.InvariantCultureIgnoreCase))
+                    return (0, "Invalid Input");
+            }
 
             var splitInput = numbersArray
                                 .Split(delimiters.ToArray(), StringSplitOptions.RemoveEmptyEntries);
@@ -39,9 +51,12 @@ namespace Benchmark.Calculator.Application.Services
 
             if (numbers.StartsWith(_customDelimiter))
             {
-                var customDelimiter = numbersSpan[_customDelimiter.Length..numbersSpan.IndexOf('\n')];
+                var customDelimiters = numbersSpan[_customDelimiter.Length..numbersSpan.IndexOf('\n')].ToArray();
 
-                delimiters.Add(customDelimiter.ToString());
+                foreach (char delimiter in customDelimiters)
+                {
+                    delimiters.Add(delimiter.ToString()!);
+                }
             }
             else
             {
@@ -53,12 +68,10 @@ namespace Benchmark.Calculator.Application.Services
 
         private (long, string) AddNumbers(string[] splitInput)
         {
-            AddValidationStrategies();
-
             long sum = 0;
-            int result = 0;
+            long result = 0;
             var isValid = false;
-            var negativeNumbers = new List<int>();
+            var negativeNumbers = new List<long>();
 
             foreach (var number in splitInput)
             {
@@ -66,7 +79,7 @@ namespace Benchmark.Calculator.Application.Services
                 {
                     try
                     {
-                        result = int.Parse(number);
+                        result = long.Parse(number);
                         isValid = strategy.Validate(result);
                     }
                     catch
@@ -85,7 +98,7 @@ namespace Benchmark.Calculator.Application.Services
             return CheckNegativeNumbers(negativeNumbers, sum);
         }
 
-        private static (long, string) CheckNegativeNumbers(List<int> negativeNumbers, long sum)
+        private static (long, string) CheckNegativeNumbers(List<long> negativeNumbers, long sum)
         {
             if (negativeNumbers.Count > 0)
             {
@@ -97,15 +110,6 @@ namespace Benchmark.Calculator.Application.Services
             }
 
             return (sum, string.Empty);
-        }
-
-        private void AddValidationStrategies()
-        {
-            _validationStrategies =
-            [
-                new NegativeNumberValidation(),
-                new MaxNumberValidationStrategy(_maxNumber),
-            ];
         }
     }
 }

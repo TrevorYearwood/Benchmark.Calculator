@@ -2,6 +2,6 @@
 {
     public interface IValidationStrategy
     {
-        bool Validate(int input);
+        bool Validate(long input);
     }
 }

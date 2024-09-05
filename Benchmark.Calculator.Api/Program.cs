@@ -27,8 +27,6 @@ app.UseHttpsRedirection();
 
 app.MapGet("/calculator/{numbers}/add", async ([FromServices] IMediator mediator, string? numbers) =>
 {
-    //Encoding...
-
     var command = new CalculatorCommand
     {
         Numbers = numbers

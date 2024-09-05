@@ -1,13 +1,12 @@
-using Benchmark.Calculator.Application.Contracts;
 using Benchmark.Calculator.Application.Services;
 
 using Shouldly;
 
-namespace Benchmark.Calculator.Api.Tests
+namespace Benchmark.Calculator.Service.Tests
 {
     public class CalculateServiceTests
     {
-        private ICalculateService? _calculateService;
+        private CalculateService? _calculateService;
 
         [Theory]
         [InlineData(null)]
@@ -22,6 +21,7 @@ namespace Benchmark.Calculator.Api.Tests
 
             //Assert 
             result.ShouldBe(0);
+            errors.ShouldBe("Empty String");
         }
 
         [Theory]
@@ -39,6 +39,7 @@ namespace Benchmark.Calculator.Api.Tests
 
             //Assert 
             result.ShouldBe(correctResult);
+            errors.ShouldBe("");
         }
 
         [Theory]
@@ -97,7 +98,24 @@ namespace Benchmark.Calculator.Api.Tests
         [InlineData("//;\n1002;2;23", 25, "")]
         [InlineData("//*\n1400*22*200\n9999*45", 267, "")]
         [InlineData("1,78\n8888,3", 82, "")]
-        public void ShouldShowCorrectResultIfInputIsNumbersGreaterThan1000(string? input, long expectedResult, string expectedErrors)
+        public void ShouldShowCorrectResultWhenInputIncludesNumbersGreaterThan1000(string? input, long expectedResult, string expectedErrors)
+        {
+            //Arrange
+            _calculateService = new CalculateService();
+
+            //Act
+            var (result, errors) = _calculateService.Add(input);
+
+            //Assert 
+            result.ShouldBe(expectedResult);
+            errors.ShouldBe(expectedErrors);
+        }
+
+        [Theory]
+        [InlineData("//*%\n1*2%3", 6, "")]
+        [InlineData("//*&;\n1400&22*200\n9999;45", 267, "")]
+        [InlineData("//:'*%\n1*2%3'56%100*44\n12:33", 251, "")]
+        public void ShouldShowCorrectWhenMultipleCustomerDelimitersAreUsed(string? input, long expectedResult, string expectedErrors)
         {
             //Arrange
             _calculateService = new CalculateService();

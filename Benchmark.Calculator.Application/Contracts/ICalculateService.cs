@@ -2,6 +2,6 @@
 {
     public interface ICalculateService
     {
-        (long, string) Add(string? input);
+        (long, string) Add(string? numbers);
     }
 }

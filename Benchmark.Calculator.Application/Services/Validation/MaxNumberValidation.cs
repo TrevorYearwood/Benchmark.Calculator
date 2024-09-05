@@ -2,11 +2,11 @@
 
 namespace Benchmark.Calculator.Application.Services.Validation
 {
-    public class MaxNumberValidationStrategy(int maxValue) : IValidationStrategy
+    public class MaxNumberValidationStrategy(long maxValue) : IValidationStrategy
     {
-        private readonly int _maxValue = maxValue;
+        private readonly long _maxValue = maxValue;
 
-        public bool Validate(int input)
+        public bool Validate(long input)
         {
             if (input > _maxValue)
                 return false;
